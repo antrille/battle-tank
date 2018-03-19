@@ -15,7 +15,15 @@ class BATTLETANK_API ATankPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
-public:	
+public: 
+	void Tick(float DeltaSeconds) override;
+	void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UUserWidget* AimPointWidget;
+
+private:	
 	ATank* GetControlledTank() const;
-	
+	void AimTowardsCrosshair();
+	bool GetSightRayHitLocation(FHitResult& HitResult) const;
 };
