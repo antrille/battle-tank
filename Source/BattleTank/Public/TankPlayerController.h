@@ -19,12 +19,14 @@ public:
 	void Tick(float DeltaSeconds) override;
 	void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player UI Widget")
-	UUserWidget* PlayerUiWidget;
+	UFUNCTION(BlueprintCallable)
+	void SetPlayerUiReference(UUserWidget* UserWidget);
 
 private:	
+	UUserWidget * PlayerUiWidget = nullptr;
+
 	ATank* GetControlledTank() const;
-	void AimTowardsCrosshair();
+	void AimTowardsCrosshair() const;
 	bool GetSightRayHitLocation(FVector& HitLocation) const;
 	bool GetAimPointWorldDirection(FVector& AimDirection) const;
 };

@@ -24,6 +24,11 @@ void ATankPlayerController::BeginPlay()
 	} 
 }
 
+void ATankPlayerController::SetPlayerUiReference(UUserWidget * UserWidget)
+{
+	PlayerUiWidget = UserWidget;
+}
+
 ATank* ATankPlayerController::GetControlledTank() const
 {
 	// Cast function already has a nullptr check inside
@@ -37,7 +42,7 @@ void ATankPlayerController::Tick(float DeltaSeconds)
 	AimTowardsCrosshair();
 }
 
-void ATankPlayerController::AimTowardsCrosshair()
+void ATankPlayerController::AimTowardsCrosshair() const
 {
 	const auto Tank = GetControlledTank();
 	if (! Tank)
@@ -48,7 +53,7 @@ void ATankPlayerController::AimTowardsCrosshair()
 	FVector HitLocation;
 	if (GetSightRayHitLocation(HitLocation))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Hit location: %s"), *HitLocation.ToCompactString());
+		GetControlledTank()->AimAt(HitLocation);
 	}
 }
 
