@@ -6,6 +6,7 @@
 #include "Runtime/UMG/Public/Blueprint/UserWidget.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetTree.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetLayoutLibrary.h"
+#include "Runtime/UMG/Public/Components/CanvasPanelSlot.h"
 
 void ATankPlayerController::BeginPlay()
 {
@@ -44,38 +45,74 @@ void ATankPlayerController::AimTowardsCrosshair()
 		return;
 	}
 	
-	FHitResult HitResult;
-	if (GetSightRayHitLocation(HitResult))
+	FVector HitLocation;
+	if (GetSightRayHitLocation(HitLocation))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Look direction: %s"), *HitResult.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Hit location: %s"), *HitLocation.ToCompactString());
 	}
-
-
 }
 
-bool ATankPlayerController::GetSightRayHitLocation(FHitResult& HitResult) const
+bool ATankPlayerController::GetSightRayHitLocation(FVector& HitLocation) const
 {
-	auto Viewport = GetWorld()->GetGameViewport();
-
-	FVector2D ViewportSize;
-	Viewport->GetViewportSize(ViewportSize);
-	
-	if (!IsValid(AimPointWidget))
+	if (!IsValid(PlayerUiWidget))
 	{
 		return false;
 	}
 
-	auto RootGeometry = AimPointWidget->GetCachedGeometry();
-	auto AimPointGeometry = AimPointWidget->WidgetTree->FindWidget("AimPoint")->GetCachedGeometry();
-	
-	auto Coords = RootGeometry.AbsoluteToLocal(AimPointGeometry.GetAbsolutePosition());
+	FVector AimDirection;
+	if (!GetAimPointWorldDirection(AimDirection))
+	{
+		return false;
+	}
 
-	// TODO: Find scale 
+	auto CameraPosition = PlayerCameraManager->GetCameraLocation();
+	auto LineTraceEnd = CameraPosition + (AimDirection * 1000000.f);
 
-	UE_LOG(LogTemp, Warning, TEXT("Screen: %s; Ray: %s"), *ViewportSize.ToString(), *Coords.ToString());
+	FHitResult HitResult;
+	if (!GetWorld()->LineTraceSingleByChannel(HitResult, CameraPosition, LineTraceEnd, ECC_Visibility))
+	{
+		HitLocation = FVector(.0f);
+		return false;
+	}
 
-	return false;
+	HitLocation = HitResult.Location;
+
+	return true;
 }
 
+bool ATankPlayerController::GetAimPointWorldDirection(FVector& AimDirection) const
+{
+	auto ViewportClient = GetWorld()->GetGameViewport();
+	auto AimPointWidget = PlayerUiWidget->WidgetTree->FindWidget("AimPoint");
+
+	if (!IsValid(AimPointWidget))
+	{
+		UE_LOG(LogTemp, Error, TEXT("AimPoint widget is not found"));
+		return false;
+	}
+
+	// Get aiming point screen coordinates
+	auto RootGeometry = PlayerUiWidget->GetCachedGeometry();
+	auto AimPointGeometry = AimPointWidget->GetCachedGeometry();
+
+	auto ScreenPosition = RootGeometry.AbsoluteToLocal(AimPointGeometry.GetAbsolutePosition());
+
+	// Apply viewport scaling factor
+	auto WidgetLayoutLibrary = NewObject<UWidgetLayoutLibrary>(UWidgetLayoutLibrary::StaticClass());
+	auto Scale = WidgetLayoutLibrary->GetViewportScale(ViewportClient);
+
+	ScreenPosition *= Scale;
+
+	FVector WorldPosition;
+	FVector ProjectedVector;
+
+	if (!DeprojectScreenPositionToWorld(ScreenPosition.X, ScreenPosition.Y, WorldPosition, AimDirection))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Can't deproject aim direction"));
+		return false;
+	}
+
+	return true;
+}
 
 
