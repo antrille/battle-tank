@@ -4,8 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "Tank.h"
 #include "TankAIController.generated.h"
+
+#pragma region Forward declarations
+
+class ATank;
+
+#pragma endregion
 
 /**
  * 

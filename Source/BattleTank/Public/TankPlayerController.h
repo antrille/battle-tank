@@ -4,8 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "Tank.h"
 #include "TankPlayerController.generated.h"
+
+#pragma region Forward declarations
+
+class ATank;
+
+#pragma endregion
 
 /**
  * 

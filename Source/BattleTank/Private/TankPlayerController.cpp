@@ -7,6 +7,7 @@
 #include "Runtime/UMG/Public/Blueprint/WidgetTree.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetLayoutLibrary.h"
 #include "Runtime/UMG/Public/Components/CanvasPanelSlot.h"
+#include "Tank.h"
 
 void ATankPlayerController::BeginPlay()
 {

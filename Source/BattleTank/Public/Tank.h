@@ -4,8 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "TankAimingComponent.h"
 #include "Tank.generated.h"
+
+#pragma region Forward declarations
+
+class UTankBarrel;
+class UTankAimingComponent;
+
+#pragma endregion
 
 UCLASS()
 class BATTLETANK_API ATank : public APawn
@@ -13,26 +19,21 @@ class BATTLETANK_API ATank : public APawn
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
 	ATank();
-	void AimAt(FVector Location);
+
+	UPROPERTY(EditAnywhere, Category=Firing)
+	float LaunchSpeed = 10000; // 1000 m/s
+
+	void AimAt(FVector Location) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetBarrelReference(UStaticMeshComponent* StaticMeshComponent);
+	void SetBarrelReference(UTankBarrel* StaticMeshComponent) const;
 
 protected:
 	UTankAimingComponent* AimingComponent = nullptr;
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	
-	
+	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 };
