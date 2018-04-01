@@ -2,8 +2,10 @@
 
 #include "TankAimingComponent.h"
 #include "TankBarrel.h"
+#include "TankTurret.h"
 #include "Runtime/Engine/Classes/GameFramework/Actor.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values for this component's properties
 UTankAimingComponent::UTankAimingComponent()
@@ -18,6 +20,11 @@ void UTankAimingComponent::SetBarrelReference(UTankBarrel* StaticMeshComponent)
 	Barrel = StaticMeshComponent;
 }
 
+void UTankAimingComponent::SetTurretReference(UTankTurret* StaticMeshComponent)
+{
+	Turret = StaticMeshComponent;
+}
+
 void UTankAimingComponent::AimAt(FVector Location, float LaunchSpeed) const
 {
 	if (!Barrel)
@@ -26,10 +33,17 @@ void UTankAimingComponent::AimAt(FVector Location, float LaunchSpeed) const
 		return;
 	}
 
+	if (!Turret)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Turret reference is not set."));
+		return;
+	}
+
+
 	const auto StartLocation = Barrel->GetSocketLocation(FName("Projectile"));
 	FVector LaunchVelocity;
 
-	auto Result = UGameplayStatics::SuggestProjectileVelocity(
+	const auto Result = UGameplayStatics::SuggestProjectileVelocity(
 		this, 
 		LaunchVelocity, 
 		StartLocation, 
@@ -47,12 +61,8 @@ void UTankAimingComponent::AimAt(FVector Location, float LaunchSpeed) const
 	}
 
 	auto AimDirection = LaunchVelocity.GetSafeNormal();
-	MoveBarrelTowards(AimDirection);
-}
+	const auto AimRotation = AimDirection.Rotation();
 
-void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection) const
-{
-	auto DeltaRotator = AimDirection.Rotation() - Barrel->GetForwardVector().Rotation();
-	
-	Barrel->Elevate(DeltaRotator.Pitch);
+	Barrel->Elevate(FRotator(AimRotation.Pitch, 0, 0));
+	Turret->Rotate(FRotator(0, AimRotation.Yaw, 0));
 }

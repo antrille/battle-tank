@@ -2,6 +2,7 @@
 
 #include "Tank.h"
 #include "TankBarrel.h"
+#include "TankTurret.h"
 #include "TankAimingComponent.h"
 
 // Sets default values
@@ -39,4 +40,9 @@ void ATank::AimAt(FVector Location) const
 void ATank::SetBarrelReference(UTankBarrel* StaticMeshComponent) const
 {
 	AimingComponent->SetBarrelReference(StaticMeshComponent);
+}
+
+void ATank::SetTurretReference(UTankTurret* StaticMeshComponent) const
+{
+	AimingComponent->SetTurretReference(StaticMeshComponent);
 }

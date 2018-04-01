@@ -9,6 +9,7 @@
 #pragma region Forward declarations
 
 class UTankBarrel;
+class UTankTurret;
 class UTankAimingComponent;
 
 #pragma endregion
@@ -28,6 +29,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetBarrelReference(UTankBarrel* StaticMeshComponent) const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetTurretReference(UTankTurret* StaticMeshComponent) const;
 
 protected:
 	UTankAimingComponent* AimingComponent = nullptr;

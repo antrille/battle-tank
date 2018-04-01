@@ -1,12 +1,20 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankBarrel.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 
-void UTankBarrel::Elevate(float RelativeSpeed)
+void UTankBarrel::Elevate(FRotator Rotation)
 {
-	auto ElevationChange = RelativeSpeed * MaxDegreesPerSecond * GetWorld()->DeltaTimeSeconds;
-	auto Elevation = FMath::Clamp(RelativeRotation.Pitch + ElevationChange, MinElevationDegrees, MaxElevationDegrees);
+	//const auto RotationStep = FMath::RInterpConstantTo(
+	//	FRotator(GetComponentRotation().Pitch, 0, 0),
+	//	Rotation,
+	//	GetWorld()->DeltaTimeSeconds,
+	//	MaxDegreesPerSecond
+	//);
 
-	SetRelativeRotation(FRotator(Elevation, 0, 0));
+	auto ParentRotation = FRotator(GetOwner()->GetActorRotation().Pitch, 0, 0);
+	auto ResultRotation = Rotation - ParentRotation;
+	ResultRotation.Pitch = FMath::ClampAngle(ResultRotation.Pitch, MinElevationDegrees, MaxElevationDegrees);
+
+	SetRelativeRotation(ResultRotation);
 }

@@ -9,6 +9,7 @@
 #pragma region Forward declarations
 
 class UTankBarrel;
+class UTankTurret;
 
 #pragma endregion
 
@@ -22,10 +23,13 @@ public:
 	UTankAimingComponent();
 
 	void SetBarrelReference(UTankBarrel* StaticMeshComponent);
+	void SetTurretReference(UTankTurret* StaticMeshComponent);
 	void AimAt(FVector Location, float LaunchSpeed) const;
 
 private:	
 	UTankBarrel* Barrel = nullptr;
+	UTankTurret* Turret = nullptr;
 
-	void MoveBarrelTowards(FVector AimDirection) const;
+	//void MoveBarrelTowards(FVector AimDirection) const;
+	//void RotateTurretTo(FRotator Rotation) const;
 };
