@@ -11,6 +11,7 @@
 class UTankBarrel;
 class UTankTurret;
 class UTankAimingComponent;
+class AProjectile;
 
 #pragma endregion
 
@@ -28,16 +29,28 @@ public:
 	void AimAt(FVector Location) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetBarrelReference(UTankBarrel* StaticMeshComponent) const;
+	void Fire();
 
 	UFUNCTION(BlueprintCallable)
-	void SetTurretReference(UTankTurret* StaticMeshComponent) const;
+	void SetBarrelReference(UTankBarrel* StaticMeshComponent);
 
+	UFUNCTION(BlueprintCallable)
+	void SetTurretReference(UTankTurret* StaticMeshComponent);
+
+	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 protected:
 	UTankAimingComponent* AimingComponent = nullptr;
 
 	void BeginPlay() override;
 
-public:	
-	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+private:
+	UTankBarrel* Barrel;
+
+	UPROPERTY(EditAnywhere, Category=Setup)
+	TSubclassOf<AProjectile> ProjectileBlueprint = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category=Setup)
+	double ReloadTimeInSeconds = 3;
+
+	double LastFireTime = 0;
 };

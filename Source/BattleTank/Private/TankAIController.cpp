@@ -13,7 +13,7 @@ void ATankAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	ATank* PlayerTank = GetPlayerTank();
+	const auto PlayerTank = Cast<ATank>(GetWorld()->GetFirstPlayerController()->GetPawn());
 
 	if (!PlayerTank)
 	{
@@ -21,19 +21,9 @@ void ATankAIController::Tick(float DeltaSeconds)
 		return;
 	}
 
-	auto HitLocation = PlayerTank->GetActorLocation();
-	GetControlledTank()->AimAt(HitLocation);
-}
+	const auto ControlledTank = Cast<ATank>(GetPawn());
+	const auto HitLocation = PlayerTank->GetActorLocation();
 
-ATank* ATankAIController::GetControlledTank() const
-{
-	// Cast function already has a nullptr check inside
-	return Cast<ATank>(GetPawn());
-}
-
-ATank* ATankAIController::GetPlayerTank() const
-{
-	const auto PlayerController = GetWorld()->GetFirstPlayerController();
-
-	return PlayerController ? Cast<ATank>(PlayerController->GetPawn()) : nullptr;
+	ControlledTank->AimAt(HitLocation);
+	ControlledTank->Fire();
 }

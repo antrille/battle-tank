@@ -4,6 +4,8 @@
 #include "TankBarrel.h"
 #include "TankTurret.h"
 #include "TankAimingComponent.h"
+#include "Projectile.h"
+#include "Runtime/Engine/Classes/Engine/World.h"
 
 // Sets default values
 ATank::ATank()
@@ -37,12 +39,38 @@ void ATank::AimAt(FVector Location) const
 	AimingComponent->AimAt(Location, LaunchSpeed);
 }
 
-void ATank::SetBarrelReference(UTankBarrel* StaticMeshComponent) const
+void ATank::Fire()
 {
-	AimingComponent->SetBarrelReference(StaticMeshComponent);
+	bool isReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTimeInSeconds;
+
+	if (!Barrel)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s - tank barrel is not set!"), *GetName());
+		return;
+	}
+
+	if (!isReloaded)
+	{
+		return;
+	}
+	
+	auto Projectile = GetWorld()->SpawnActor<AProjectile>(
+		ProjectileBlueprint, 
+		Barrel->GetSocketLocation(FName("Projectile")),
+		Barrel->GetSocketRotation(FName("Projectile"))
+	);
+
+	Projectile->LaunchProjectile(LaunchSpeed);
+	LastFireTime = FPlatformTime::Seconds();
 }
 
-void ATank::SetTurretReference(UTankTurret* StaticMeshComponent) const
+void ATank::SetBarrelReference(UTankBarrel* StaticMeshComponent)
+{
+	AimingComponent->SetBarrelReference(StaticMeshComponent);
+	Barrel = StaticMeshComponent;
+}
+
+void ATank::SetTurretReference(UTankTurret* StaticMeshComponent)
 {
 	AimingComponent->SetTurretReference(StaticMeshComponent);
 }

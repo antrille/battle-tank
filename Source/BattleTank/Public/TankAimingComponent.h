@@ -24,12 +24,12 @@ public:
 
 	void SetBarrelReference(UTankBarrel* StaticMeshComponent);
 	void SetTurretReference(UTankTurret* StaticMeshComponent);
-	void AimAt(FVector Location, float LaunchSpeed) const;
+	void AimAt(FVector Location, float LaunchSpeed);
+	void MoveBarrelTowards(FVector AimDirection);
+
+protected:
 
 private:	
 	UTankBarrel* Barrel = nullptr;
 	UTankTurret* Turret = nullptr;
-
-	//void MoveBarrelTowards(FVector AimDirection) const;
-	//void RotateTurretTo(FRotator Rotation) const;
 };

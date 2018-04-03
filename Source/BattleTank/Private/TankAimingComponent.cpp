@@ -5,7 +5,6 @@
 #include "TankTurret.h"
 #include "Runtime/Engine/Classes/GameFramework/Actor.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
-#include "DrawDebugHelpers.h"
 
 // Sets default values for this component's properties
 UTankAimingComponent::UTankAimingComponent()
@@ -25,7 +24,7 @@ void UTankAimingComponent::SetTurretReference(UTankTurret* StaticMeshComponent)
 	Turret = StaticMeshComponent;
 }
 
-void UTankAimingComponent::AimAt(FVector Location, float LaunchSpeed) const
+void UTankAimingComponent::AimAt(FVector Location, float LaunchSpeed) 
 {
 	if (!Barrel)
 	{
@@ -61,8 +60,26 @@ void UTankAimingComponent::AimAt(FVector Location, float LaunchSpeed) const
 	}
 
 	auto AimDirection = LaunchVelocity.GetSafeNormal();
-	const auto AimRotation = AimDirection.Rotation();
+	MoveBarrelTowards(AimDirection);
+}
 
-	Barrel->Elevate(FRotator(AimRotation.Pitch, 0, 0));
-	Turret->Rotate(FRotator(0, AimRotation.Yaw, 0));
+void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)
+{
+	if (!ensure(Barrel) || !ensure(Turret)) { return; }
+
+	// Work-out difference between current barrel roation, and AimDirection
+	auto BarrelRotator = Barrel->GetForwardVector().Rotation();
+	auto AimAsRotator = AimDirection.Rotation();
+	auto DeltaRotator = AimAsRotator - BarrelRotator;
+
+	// Always yaw the shortest way
+	Barrel->Elevate(DeltaRotator.Pitch);
+	if (FMath::Abs(DeltaRotator.Yaw) < 180)
+	{
+		Turret->Rotate(DeltaRotator.Yaw);
+	}
+	else // Avoid going the long-way round
+	{
+		Turret->Rotate(-DeltaRotator.Yaw);
+	}
 }

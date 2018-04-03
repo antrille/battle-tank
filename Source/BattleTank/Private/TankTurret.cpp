@@ -3,18 +3,10 @@
 #include "TankTurret.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 
-void UTankTurret::Rotate(FRotator Rotation)
+void UTankTurret::Rotate(float RelativeSpeed)
 {
-	auto ParentRotation = FRotator(0, GetOwner()->GetActorRotation().Yaw, 0);
-	
-	/*
-	const auto RotationStep = FMath::RInterpConstantTo(
-		FRotator(0, GetComponentRotation().Yaw, 0),
-		Rotation,
-		GetWorld()->DeltaTimeSeconds, 
-		MaxDegreesPerSecond
-	);*/
-
-
-	SetRelativeRotation(Rotation - ParentRotation);
+	RelativeSpeed = FMath::Clamp<float>(RelativeSpeed, -1, +1);
+	auto RotationChange = RelativeSpeed * MaxDegreesPerSecond * GetWorld()->DeltaTimeSeconds;
+	auto Rotation = RelativeRotation.Yaw + RotationChange;
+	SetRelativeRotation(FRotator(0, Rotation, 0));
 }

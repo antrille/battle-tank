@@ -26,7 +26,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerUiReference(UUserWidget* UserWidget);
-
+	 
 private:	
 	UUserWidget * PlayerUiWidget = nullptr;
 
