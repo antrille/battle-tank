@@ -21,6 +21,8 @@ void ATankAIController::Tick(float DeltaSeconds)
 		return;
 	}
 
+	MoveToActor(PlayerTank, AcceptanceRadius);
+
 	const auto ControlledTank = Cast<ATank>(GetPawn());
 	const auto HitLocation = PlayerTank->GetActorLocation();
 

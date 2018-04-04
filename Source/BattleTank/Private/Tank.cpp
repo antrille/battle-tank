@@ -4,6 +4,7 @@
 #include "TankBarrel.h"
 #include "TankTurret.h"
 #include "TankAimingComponent.h"
+#include "TankMovementComponent.h"
 #include "Projectile.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 
@@ -49,13 +50,20 @@ void ATank::Fire()
 		return;
 	}
 
+	if (! ProjectileBlueprint)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s - Projectile blueprint is not set!"), *GetName());
+		return;
+	}
+
+
 	if (!isReloaded)
 	{
 		return;
 	}
 	
 	auto Projectile = GetWorld()->SpawnActor<AProjectile>(
-		ProjectileBlueprint, 
+		ProjectileBlueprint,
 		Barrel->GetSocketLocation(FName("Projectile")),
 		Barrel->GetSocketRotation(FName("Projectile"))
 	);

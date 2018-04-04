@@ -12,17 +12,6 @@
 void ATankPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	ATank* Tank = GetControlledTank();
-	
-	if (!Tank)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerController is not possessing a tank"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerController possessing: %s"), *Tank->GetName());
-	} 
 }
 
 void ATankPlayerController::SetPlayerUiReference(UUserWidget * UserWidget)

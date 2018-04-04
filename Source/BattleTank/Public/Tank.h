@@ -11,6 +11,7 @@
 class UTankBarrel;
 class UTankTurret;
 class UTankAimingComponent;
+class UTankMovementComponent;
 class AProjectile;
 
 #pragma endregion
@@ -22,7 +23,7 @@ class BATTLETANK_API ATank : public APawn
 
 public:
 	ATank();
-
+	
 	UPROPERTY(EditAnywhere, Category=Firing)
 	float LaunchSpeed = 10000; // 1000 m/s
 
@@ -38,14 +39,16 @@ public:
 	void SetTurretReference(UTankTurret* StaticMeshComponent);
 
 	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 protected:
+	UPROPERTY(BlueprintReadOnly)
+	UTankMovementComponent* MovementComponent = nullptr;
+
 	UTankAimingComponent* AimingComponent = nullptr;
 
 	void BeginPlay() override;
 
 private:
-	UTankBarrel* Barrel;
-
 	UPROPERTY(EditAnywhere, Category=Setup)
 	TSubclassOf<AProjectile> ProjectileBlueprint = nullptr;
 
@@ -53,4 +56,6 @@ private:
 	double ReloadTimeInSeconds = 3;
 
 	double LastFireTime = 0;
+
+	UTankBarrel* Barrel;
 };
