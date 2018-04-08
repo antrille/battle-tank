@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankPlayerController.h"
 #include "Runtime/Engine/Classes/Engine/GameViewportClient.h"
@@ -86,13 +86,16 @@ bool ATankPlayerController::GetAimPointWorldDirection(FVector& AimDirection) con
 		return false;
 	}
 
-	// Get aiming point screen coordinates
+	// Получаем координаты прицела на экране
 	auto RootGeometry = PlayerUiWidget->GetCachedGeometry();
 	auto AimPointGeometry = AimPointWidget->GetCachedGeometry();
 
 	auto ScreenPosition = RootGeometry.AbsoluteToLocal(AimPointGeometry.GetAbsolutePosition());
 
-	// Apply viewport scaling factor
+	// Добавляем половину размера прицела к результирующей позиции, чтобы она приходилась на центр виджета
+	ScreenPosition += AimPointGeometry.GetLocalSize() * .5f;
+
+	// Применяем к позиции DPI масштабирование UI
 	auto WidgetLayoutLibrary = NewObject<UWidgetLayoutLibrary>(UWidgetLayoutLibrary::StaticClass());
 	auto Scale = WidgetLayoutLibrary->GetViewportScale(ViewportClient);
 

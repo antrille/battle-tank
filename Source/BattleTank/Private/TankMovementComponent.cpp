@@ -40,22 +40,14 @@ void UTankMovementComponent::IntendTurnRight(float Throw)
 	RightTrack->SetThrottle(-NormalizedThrow);
 }
 
-void UTankMovementComponent::IntendTurnLeft(float Throw)
-{
-	if (!LeftTrack || !RightTrack)
-	{
-		return;
-	}
-
-	const auto NormalizedThrow = FMath::Clamp(Throw, -1.f, 1.f);
-
-	LeftTrack->SetThrottle(-NormalizedThrow);
-	RightTrack->SetThrottle(NormalizedThrow);
-}
-
 void UTankMovementComponent::RequestDirectMove(const FVector& MoveVelocity, bool bForceMaxSpeed)
 {
-	auto TankForwardVector = GetOwner()->GetActorForwardVector().GetSafeNormal(); 
-	auto NormalizedVelocity = MoveVelocity.GetSafeNormal();
-	UE_LOG(LogTemp, Warning, TEXT("%s is moving towards %s"), *GetOwner()->GetName(), *NormalizedVelocity.ToCompactString());
+	const auto TankForwardVector = GetOwner()->GetActorForwardVector().GetSafeNormal(); 
+	const auto NormalizedVelocity = MoveVelocity.GetSafeNormal();
+
+	const auto DotProduct = FVector::DotProduct(TankForwardVector, NormalizedVelocity);
+	IntendMoveForward(DotProduct);
+
+	const auto CrossProduct = FVector::CrossProduct(TankForwardVector, NormalizedVelocity);
+	IntendTurnRight(CrossProduct.Z);
 }

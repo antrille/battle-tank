@@ -44,6 +44,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	UTankMovementComponent* MovementComponent = nullptr;
 
+	UPROPERTY(BlueprintReadOnly)
 	UTankAimingComponent* AimingComponent = nullptr;
 
 	void BeginPlay() override;
