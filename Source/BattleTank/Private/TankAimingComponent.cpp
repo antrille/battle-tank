@@ -3,6 +3,8 @@
 #include "TankAimingComponent.h"
 #include "TankBarrel.h"
 #include "TankTurret.h"
+#include "Projectile.h"
+#include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Classes/GameFramework/Actor.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
@@ -14,30 +16,12 @@ UTankAimingComponent::UTankAimingComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UTankAimingComponent::SetBarrelReference(UTankBarrel* StaticMeshComponent)
+void UTankAimingComponent::AimAt(FVector Location) 
 {
-	Barrel = StaticMeshComponent;
-}
-
-void UTankAimingComponent::SetTurretReference(UTankTurret* StaticMeshComponent)
-{
-	Turret = StaticMeshComponent;
-}
-
-void UTankAimingComponent::AimAt(FVector Location, float LaunchSpeed) 
-{
-	if (!Barrel)
+	if (!ensure(Barrel && Turret))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Barrel reference is not set."));
 		return;
 	}
-
-	if (!Turret)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Turret reference is not set."));
-		return;
-	}
-
 
 	const auto StartLocation = Barrel->GetSocketLocation(FName("Projectile"));
 	FVector LaunchVelocity;
@@ -63,9 +47,36 @@ void UTankAimingComponent::AimAt(FVector Location, float LaunchSpeed)
 	MoveBarrelTowards(AimDirection);
 }
 
+void UTankAimingComponent::Fire()
+{
+	bool isReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTimeInSeconds;
+
+	if (!ensure(Barrel && ProjectileBlueprint))
+	{
+		return;
+	}
+
+	if (!isReloaded)
+	{
+		return;
+	}
+	
+	auto Projectile = GetWorld()->SpawnActor<AProjectile>(
+		ProjectileBlueprint,
+		Barrel->GetSocketLocation(FName("Projectile")),
+		Barrel->GetSocketRotation(FName("Projectile"))
+	);
+
+	Projectile->LaunchProjectile(LaunchSpeed);
+	LastFireTime = FPlatformTime::Seconds();
+}
+
 void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)
 {
-	if (!ensure(Barrel) || !ensure(Turret)) { return; }
+	if (!ensure(Barrel && Turret))
+	{
+		return;
+	}
 
 	// Work-out difference between current barrel roation, and AimDirection
 	auto BarrelRotator = Barrel->GetForwardVector().Rotation();
@@ -82,4 +93,15 @@ void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)
 	{
 		Turret->Rotate(-DeltaRotator.Yaw);
 	}
+}
+
+UTankBarrel* UTankAimingComponent::GetBarrelReference() const
+{
+	return Barrel;
+}
+
+void UTankAimingComponent::Initialize(UTankBarrel* BarrelToSet, UTankTurret* TurretToSet)
+{
+	Barrel = BarrelToSet;
+	Turret = TurretToSet;
 }

@@ -8,7 +8,7 @@
 
 #pragma region Forward declarations
 
-class ATank;
+class UTankAimingComponent;
 
 #pragma endregion
 
@@ -28,8 +28,8 @@ public:
 	void SetPlayerUiReference(UUserWidget* UserWidget);
 
 protected:
-	UFUNCTION(BlueprintCallable, Category = "Setup")
-	ATank* GetControlledTank() const;
+	UFUNCTION(BlueprintImplementableEvent, Category="Setup")
+	void FoundAimingComponent(UTankAimingComponent* AimingComponentRef);
 
 private:	
 	UUserWidget * PlayerUiWidget = nullptr;

@@ -6,23 +6,24 @@
 #include "Runtime/UMG/Public/Blueprint/UserWidget.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetTree.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetLayoutLibrary.h"
-#include "Runtime/UMG/Public/Components/CanvasPanelSlot.h"
-#include "Tank.h"
+#include "TankAimingComponent.h"
 
 void ATankPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
+	if (!ensure(AimingComponent))
+	{
+		return;
+	}
+
+	FoundAimingComponent(AimingComponent);
 }
 
 void ATankPlayerController::SetPlayerUiReference(UUserWidget * UserWidget)
 {
 	PlayerUiWidget = UserWidget;
-}
-
-ATank* ATankPlayerController::GetControlledTank() const
-{
-	// Cast function already has a nullptr check inside
-	return Cast<ATank>(GetPawn());
 }
 
 void ATankPlayerController::Tick(float DeltaSeconds)
@@ -34,22 +35,22 @@ void ATankPlayerController::Tick(float DeltaSeconds)
 
 void ATankPlayerController::AimTowardsCrosshair() const
 {
-	const auto Tank = GetControlledTank();
-	if (! Tank)
-	{
-		return;
-	}
-	
 	FVector HitLocation;
 	if (GetSightRayHitLocation(HitLocation))
 	{
-		GetControlledTank()->AimAt(HitLocation);
+		auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
+		if (!ensure(AimingComponent))
+		{
+			return;
+		}
+
+		AimingComponent->AimAt(HitLocation);
 	}
 }
 
 bool ATankPlayerController::GetSightRayHitLocation(FVector& HitLocation) const
 {
-	if (!IsValid(PlayerUiWidget))
+	if (!ensure(PlayerUiWidget))
 	{
 		return false;
 	}
@@ -80,7 +81,7 @@ bool ATankPlayerController::GetAimPointWorldDirection(FVector& AimDirection) con
 	auto ViewportClient = GetWorld()->GetGameViewport();
 	auto AimPointWidget = PlayerUiWidget->WidgetTree->FindWidget("AimPoint");
 
-	if (!IsValid(AimPointWidget))
+	if (!ensure(AimPointWidget))
 	{
 		UE_LOG(LogTemp, Error, TEXT("AimPoint widget is not found"));
 		return false;
