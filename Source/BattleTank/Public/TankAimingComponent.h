@@ -23,7 +23,10 @@ enum class EFiringState : uint8
 	Locked
 };
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+/**
+ * Class with tank aiming and firing logic
+ */
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class BATTLETANK_API UTankAimingComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -40,11 +43,6 @@ public:
 
 	void AimAt(FVector Location);
 	
-
-	void MoveBarrelTowards(FVector AimDirection);
-
-	UTankBarrel* GetBarrelReference() const;
-
 protected:
 	UPROPERTY(BlueprintReadOnly, Category="State")
 	EFiringState FiringState = EFiringState::Locked;
@@ -63,4 +61,12 @@ private:
 	UTankTurret* Turret = nullptr;
 
 	double LastFireTime = 0;
+
+	FVector AimDirection;
+
+	void BeginPlay() override;
+	void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	bool IsBarrelMoving();
+	void AimBarrel();
 };

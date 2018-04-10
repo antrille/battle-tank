@@ -43,24 +43,22 @@ void UTankAimingComponent::AimAt(FVector Location)
 		return;
 	}
 
-	auto AimDirection = LaunchVelocity.GetSafeNormal();
-	MoveBarrelTowards(AimDirection);
+	AimDirection = LaunchVelocity.GetSafeNormal();
+	AimBarrel();
 }
 
 void UTankAimingComponent::Fire()
 {
-	bool isReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTimeInSeconds;
+	if (FiringState == EFiringState::Reloading)
+	{
+		return;
+	}
 
 	if (!ensure(Barrel && ProjectileBlueprint))
 	{
 		return;
 	}
 
-	if (!isReloaded)
-	{
-		return;
-	}
-	
 	auto Projectile = GetWorld()->SpawnActor<AProjectile>(
 		ProjectileBlueprint,
 		Barrel->GetSocketLocation(FName("Projectile")),
@@ -71,7 +69,48 @@ void UTankAimingComponent::Fire()
 	LastFireTime = FPlatformTime::Seconds();
 }
 
-void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)
+void UTankAimingComponent::Initialize(UTankBarrel* BarrelToSet, UTankTurret* TurretToSet)
+{
+	Barrel = BarrelToSet;
+	Turret = TurretToSet;
+}
+
+void UTankAimingComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	LastFireTime = FPlatformTime::Seconds();
+}
+
+void UTankAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (FPlatformTime::Seconds() - LastFireTime < ReloadTimeInSeconds)
+	{
+		FiringState = EFiringState::Reloading;
+	} 
+	else if (IsBarrelMoving())
+	{
+		FiringState = EFiringState::Aiming;
+	}
+	else
+	{
+		FiringState = EFiringState::Locked;
+	}
+}
+
+bool UTankAimingComponent::IsBarrelMoving()
+{
+	if (!ensure(Barrel))
+	{
+		return false;
+	}
+
+	return !AimDirection.Equals(Barrel->GetForwardVector(), 0.01f);
+}
+
+void UTankAimingComponent::AimBarrel()
 {
 	if (!ensure(Barrel && Turret))
 	{
@@ -93,15 +132,4 @@ void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)
 	{
 		Turret->Rotate(-DeltaRotator.Yaw);
 	}
-}
-
-UTankBarrel* UTankAimingComponent::GetBarrelReference() const
-{
-	return Barrel;
-}
-
-void UTankAimingComponent::Initialize(UTankBarrel* BarrelToSet, UTankTurret* TurretToSet)
-{
-	Barrel = BarrelToSet;
-	Turret = TurretToSet;
 }

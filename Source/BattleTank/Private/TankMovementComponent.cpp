@@ -33,7 +33,7 @@ void UTankMovementComponent::IntendTurnRight(float Throw)
 	{
 		return;
 	}
-
+	
 	const auto NormalizedThrow = FMath::Clamp(Throw, -1.f, 1.f);
 
 	LeftTrack->SetThrottle(NormalizedThrow);
