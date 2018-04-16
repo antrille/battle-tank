@@ -31,5 +31,9 @@ void ATankAIController::Tick(float DeltaSeconds)
 	}
 
 	AimingComponent->AimAt(HitLocation);
-	AimingComponent->Fire();
+
+	if (AimingComponent->GetFiringState() == EFiringState::Locked)
+	{
+		AimingComponent->Fire();
+	}
 }

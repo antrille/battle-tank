@@ -20,7 +20,8 @@ enum class EFiringState : uint8
 {
 	Reloading,
 	Aiming,
-	Locked
+	Locked,
+	NoAmmo
 };
 
 /**
@@ -43,12 +44,16 @@ public:
 
 	void AimAt(FVector Location);
 	
+	EFiringState GetFiringState() const;
 protected:
 	UPROPERTY(BlueprintReadOnly, Category="State")
 	EFiringState FiringState = EFiringState::Locked;
 
 	UPROPERTY(EditAnywhere, Category="Firing")
 	float LaunchSpeed = 10000.f;
+
+	UPROPERTY(BlueprintReadOnly, Category="Firing")
+	int Ammo = 10;
 
 	UPROPERTY(EditAnywhere, Category="Setup")
 	TSubclassOf<AProjectile> ProjectileBlueprint = nullptr;
