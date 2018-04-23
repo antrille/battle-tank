@@ -52,7 +52,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Firing")
 	float LaunchSpeed = 10000.f;
 
-	UPROPERTY(BlueprintReadOnly, Category="Firing")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Firing")
 	int Ammo = 10;
 
 	UPROPERTY(EditAnywhere, Category="Setup")

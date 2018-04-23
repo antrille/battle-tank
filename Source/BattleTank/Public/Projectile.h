@@ -9,6 +9,8 @@
 #pragma region Forward declarations
 
 class UProjectileMovementComponent;
+class UParticleSystemComponent;
+class UStaticMeshComponent;
 
 #pragma endregion
 
@@ -32,6 +34,17 @@ public:
 	void LaunchProjectile(float Speed);
 
 private:
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UStaticMeshComponent* CollisionMesh = nullptr;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UParticleSystemComponent* LaunchBlast = nullptr;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UParticleSystemComponent* ImpactBlast = nullptr;
+
 	UProjectileMovementComponent* MovementComponent = nullptr;
-	
+
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComponent, AActor * OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 };
