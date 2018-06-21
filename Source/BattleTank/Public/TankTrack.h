@@ -6,6 +6,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "TankTrack.generated.h"
 
+class ASprungWheel;
+
 /**
  * 
  */
@@ -15,23 +17,15 @@ class BATTLETANK_API UTankTrack : public UStaticMeshComponent
 	GENERATED_BODY()
 
 public:
+	UTankTrack();
 
 	// Sets a throttle between -1 and +1
 	UFUNCTION(BlueprintCallable, Category="Input")
-	void SetThrottle(float Throttle);
+	void DriveTrack(float AxisValue) const;
 
 private:
-	UTankTrack();
-	
 	UPROPERTY(EditDefaultsOnly)
 	float TrackMaxDrivingForce = 40000000.0f;
-	float CurrentThrottle = 0;
 
-	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComponent, AActor * OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
-
-	void BeginPlay() override;
-	void ApplySidewaysForce();
-
-	void DriveTrack();
+	TArray<ASprungWheel*> GetWheels() const;
 };

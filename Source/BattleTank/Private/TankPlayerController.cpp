@@ -1,19 +1,20 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankPlayerController.h"
-#include "Runtime/Engine/Classes/Engine/GameViewportClient.h"
-#include "Runtime/Engine/Classes/Engine/World.h"
-#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
-#include "Runtime/UMG/Public/Blueprint/WidgetTree.h"
-#include "Runtime/UMG/Public/Blueprint/WidgetLayoutLibrary.h"
+#include "Engine/GameViewportClient.h"
+#include "Engine/World.h"
+#include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetTree.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "TankAimingComponent.h"
+#include "Tank.h"
 
 void ATankPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
-	if (!ensure(AimingComponent))
+	if (!AimingComponent)
 	{
 		return;
 	}
@@ -21,40 +22,61 @@ void ATankPlayerController::BeginPlay()
 	FoundAimingComponent(AimingComponent);
 }
 
+void ATankPlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// Player tank aiming logic
+	const auto PossessedTank = Cast<ATank>(GetPawn());
+	if (!PossessedTank)
+	{
+		return;
+	}
+
+	auto AimingComponent = PossessedTank->FindComponentByClass<UTankAimingComponent>();
+	if (!AimingComponent)
+	{
+		return;
+	}
+
+	FVector HitLocation;
+	if (GetSightRayHitLocation(HitLocation))
+	{		
+		AimingComponent->AimAt(HitLocation);
+	}
+}
+
 void ATankPlayerController::SetPlayerUiReference(UUserWidget * UserWidget)
 {
 	PlayerUiWidget = UserWidget;
 }
 
-void ATankPlayerController::Tick(float DeltaSeconds)
+void ATankPlayerController::SetPawn(APawn* InPawn)
 {
-	Super::Tick(DeltaSeconds);
+	Super::SetPawn(InPawn);
 
-	AimTowardsCrosshair();
-}
-
-void ATankPlayerController::AimTowardsCrosshair() const
-{
-	FVector HitLocation;
-	if (GetSightRayHitLocation(HitLocation))
+	if (InPawn)
 	{
-		auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
-		if (!ensure(AimingComponent))
+		auto PossessedTank = Cast<ATank>(InPawn);
+		if (!PossessedTank)
 		{
 			return;
 		}
 
-		AimingComponent->AimAt(HitLocation);
+		// Subscribe our local method to the tank's death event
+		PossessedTank->OnDeath.AddUniqueDynamic(this, &ATankPlayerController::OnPossessedTankDeath);
 	}
+}
+
+void ATankPlayerController::OnPossessedTankDeath()
+{
+	TankDeath();
+
+	StartSpectatingOnly();
 }
 
 bool ATankPlayerController::GetSightRayHitLocation(FVector& HitLocation) const
 {
-	if (!ensure(PlayerUiWidget))
-	{
-		return false;
-	}
-
 	FVector AimDirection;
 	if (!GetAimPointWorldDirection(AimDirection))
 	{
@@ -65,7 +87,7 @@ bool ATankPlayerController::GetSightRayHitLocation(FVector& HitLocation) const
 	auto LineTraceEnd = CameraPosition + (AimDirection * 1000000.f);
 
 	FHitResult HitResult;
-	if (!GetWorld()->LineTraceSingleByChannel(HitResult, CameraPosition, LineTraceEnd, ECC_Visibility))
+	if (!GetWorld()->LineTraceSingleByChannel(HitResult, CameraPosition, LineTraceEnd, ECC_Camera))
 	{
 		HitLocation = FVector(.0f);
 		return false;
@@ -78,7 +100,11 @@ bool ATankPlayerController::GetSightRayHitLocation(FVector& HitLocation) const
 
 bool ATankPlayerController::GetAimPointWorldDirection(FVector& AimDirection) const
 {
-	auto ViewportClient = GetWorld()->GetGameViewport();
+	if (!ensure(PlayerUiWidget))
+	{
+		return false;
+	}
+
 	auto AimPointWidget = PlayerUiWidget->WidgetTree->FindWidget("AimPoint");
 
 	if (!ensure(AimPointWidget))
@@ -98,13 +124,12 @@ bool ATankPlayerController::GetAimPointWorldDirection(FVector& AimDirection) con
 
 	// Применяем к позиции DPI масштабирование UI
 	auto WidgetLayoutLibrary = NewObject<UWidgetLayoutLibrary>(UWidgetLayoutLibrary::StaticClass());
-	auto Scale = WidgetLayoutLibrary->GetViewportScale(ViewportClient);
+	auto Scale = WidgetLayoutLibrary->GetViewportScale(GetWorld()->GetGameViewport());
 
 	ScreenPosition *= Scale;
 
 	FVector WorldPosition;
 	FVector ProjectedVector;
-
 	if (!DeprojectScreenPositionToWorld(ScreenPosition.X, ScreenPosition.Y, WorldPosition, AimDirection))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Can't deproject aim direction"));

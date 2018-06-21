@@ -21,10 +21,10 @@ void UTankMovementComponent::IntendMoveForward(float Throw)
 		return;
 	}
 
-	const auto NormalizedThrow = FMath::Clamp(Throw, -1.f, 1.f);
+	const auto NormalizedAxisValue = FMath::Clamp(Throw, -1.f, 1.f);
 
-	LeftTrack->SetThrottle(NormalizedThrow);
-	RightTrack->SetThrottle(NormalizedThrow);
+	LeftTrack->DriveTrack(NormalizedAxisValue);
+	RightTrack->DriveTrack(NormalizedAxisValue);
 }
 
 void UTankMovementComponent::IntendTurnRight(float Throw)
@@ -34,10 +34,10 @@ void UTankMovementComponent::IntendTurnRight(float Throw)
 		return;
 	}
 	
-	const auto NormalizedThrow = FMath::Clamp(Throw, -1.f, 1.f);
+	const auto NormalizedAxisValue = FMath::Clamp(Throw, -1.f, 1.f);
 
-	LeftTrack->SetThrottle(NormalizedThrow);
-	RightTrack->SetThrottle(-NormalizedThrow);
+	LeftTrack->DriveTrack(NormalizedAxisValue);
+	RightTrack->DriveTrack(-NormalizedAxisValue);
 }
 
 void UTankMovementComponent::RequestDirectMove(const FVector& MoveVelocity, bool bForceMaxSpeed)

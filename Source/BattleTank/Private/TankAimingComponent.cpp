@@ -4,9 +4,9 @@
 #include "TankBarrel.h"
 #include "TankTurret.h"
 #include "Projectile.h"
-#include "Runtime/Engine/Classes/Engine/World.h"
-#include "Runtime/Engine/Classes/GameFramework/Actor.h"
-#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+#include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
 UTankAimingComponent::UTankAimingComponent()

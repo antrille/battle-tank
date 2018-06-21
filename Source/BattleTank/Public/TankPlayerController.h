@@ -27,14 +27,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerUiReference(UUserWidget* UserWidget);
 
+	UFUNCTION()
+	void OnPossessedTankDeath();
+
+	void SetPawn(APawn* InPawn) override;
+
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="Setup")
 	void FoundAimingComponent(UTankAimingComponent* AimingComponentRef);
 
+	UFUNCTION(BlueprintImplementableEvent, Category="Possessed Tank Events")
+	void TankDeath();
+
 private:	
 	UUserWidget * PlayerUiWidget = nullptr;
 
-	void AimTowardsCrosshair() const;
 	bool GetSightRayHitLocation(FVector& HitLocation) const;
 	bool GetAimPointWorldDirection(FVector& AimDirection) const;
 };

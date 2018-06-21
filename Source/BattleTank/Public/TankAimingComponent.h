@@ -47,7 +47,7 @@ public:
 	EFiringState GetFiringState() const;
 protected:
 	UPROPERTY(BlueprintReadOnly, Category="State")
-	EFiringState FiringState = EFiringState::Locked;
+	EFiringState FiringState = EFiringState::Reloading;
 
 	UPROPERTY(EditAnywhere, Category="Firing")
 	float LaunchSpeed = 10000.f;
